@@ -24,19 +24,43 @@
     };
   };
 
-  outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew, eza, rust-overlay }:
-  let
-    configuration = { pkgs, ... }: {
+  outputs = inputs @ {
+    self,
+    nix-darwin,
+    nixpkgs,
+    nix-homebrew,
+    eza,
+    rust-overlay,
+  }: let
+    configuration = {pkgs, ...}: {
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wget
-      environment.systemPackages = [ 
-	        pkgs.neovim
-	        pkgs.tmux		
-	        pkgs.ghostty-bin
-		pkgs.fzf
-		pkgs.zoxide
-		pkgs.starship
-		pkgs.stow
+      environment.systemPackages = [
+        pkgs.neovim
+        pkgs.tmux
+        pkgs.ghostty-bin
+        pkgs.fzf
+        pkgs.zoxide
+        pkgs.starship
+        pkgs.stow
+        pkgs.eza
+        pkgs.tree-sitter
+        pkgs.nodejs_25
+        pkgs.dotnet-sdk_10
+        pkgs.cargo
+        pkgs.uv
+        pkgs.python315
+        pkgs.lazygit
+        pkgs.ripgrep
+
+        pkgs.avrdude # flashing tool
+        pkgs.pkgsCross.avr.buildPackages.gcc # avr-gcc cross-compiler
+        pkgs.pkgsCross.avr.buildPackages.binutils # avr-objcopy, avr-size etc.
+        pkgs.pkgsCross.avr.avrlibc
+        pkgs.cmake
+        pkgs.gnumake
+        pkgs.bear
+        pkgs.simavr
       ];
 
       # Necessary for using flakes on this system.
@@ -56,47 +80,48 @@
       nixpkgs.hostPlatform = "aarch64-darwin";
 
       fonts.packages = [
-      	pkgs.nerd-fonts.monaspace
+        pkgs.nerd-fonts.monaspace
       ];
 
-	    homebrew = {
-	      enable = true;
-	      casks = [
-	        "raycast"
-	        "zen-browser"
-	        "thunderbird"
-	        "visual-studio-code@insiders"
-	      ];
-	      onActivation.cleanup = "zap";
-	      onActivation.autoUpdate = true;
-	      onActivation.upgrade = true;
-	    };
+      homebrew = {
+        enable = true;
+        casks = [
+          "raycast"
+          "zen"
+          "thunderbird"
+          "visual-studio-code@insiders"
+        ];
+        onActivation.cleanup = "zap";
+        onActivation.autoUpdate = true;
+        onActivation.upgrade = true;
+      };
 
-	    system.primaryUser = "levynkeneng";
+      system.primaryUser = "levynkeneng";
 
-	    system.defaults = {
-	      dock.autohide = true;
-	      dock.persistent-apps = [
-	        "${pkgs.ghostty-bin}/Applications/Ghostty.app"
-	        "/Applications/Thunderbird.app"
-	        "/Applications/Zen.app"
-	      ];
-	    };
+      system.defaults = {
+        NSGlobalDomain._HIHideMenuBar = true;
+        dock.autohide = true;
+        dock.persistent-apps = [
+          "${pkgs.ghostty-bin}/Applications/Ghostty.app"
+          "/Applications/Thunderbird.app"
+          "/Applications/Zen.app"
+        ];
+      };
     };
-  in
-  {
+  in {
     # Build darwin flake using:
     # $ darwin-rebuild build --flake .#simple
     darwinConfigurations."main" = nix-darwin.lib.darwinSystem {
-      modules = [ 
-      	configuration
-	      nix-homebrew.darwinModules.nix-homebrew {
-	        nix-homebrew = {
-	          enable = true;
-	          enableRosetta = true;
-	          user = "levynkeneng";
-	        };
-	      }
+      modules = [
+        configuration
+        nix-homebrew.darwinModules.nix-homebrew
+        {
+          nix-homebrew = {
+            enable = true;
+            enableRosetta = true;
+            user = "levynkeneng";
+          };
+        }
       ];
     };
   };
