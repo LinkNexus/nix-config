@@ -99,7 +99,7 @@
       system.primaryUser = "levynkeneng";
 
       system.defaults = {
-        NSGlobalDomain._HIHideMenuBar = true;
+        # NSGlobalDomain._HIHideMenuBar = true;
         dock.autohide = true;
         dock.persistent-apps = [
           "${pkgs.ghostty-bin}/Applications/Ghostty.app"
