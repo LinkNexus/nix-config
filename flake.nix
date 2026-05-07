@@ -88,16 +88,27 @@
 
       fonts.packages = [
         pkgs.nerd-fonts.monaspace
+        pkgs.inter
       ];
 
       homebrew = {
         enable = true;
+        brews = [
+          "mas"
+          "opencode"
+        ];
+
         casks = [
           "raycast"
           "zen"
           "thunderbird"
           "visual-studio-code@insiders"
+          "tailscale-app"
+          "localsend"
+          "moonlight"
+          "font-cascadia-code-nf"
         ];
+
         onActivation.cleanup = "zap";
         onActivation.autoUpdate = true;
         onActivation.upgrade = true;
