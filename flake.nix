@@ -15,6 +15,10 @@
       };
     };
 
+    flake-utils = {
+      url = "github:numtide/flake-utils";
+    };
+
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs = {
@@ -31,6 +35,7 @@
     nix-homebrew,
     eza,
     rust-overlay,
+    flake-utils,
   }: let
     configuration = {pkgs, ...}: {
       # List packages installed in system profile. To search by name, run:
