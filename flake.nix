@@ -66,6 +66,8 @@
         pkgs.gnumake
         pkgs.bear
         pkgs.simavr
+
+        pkgs.bun
       ];
 
       # Necessary for using flakes on this system.
