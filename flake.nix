@@ -90,6 +90,13 @@
       # The platform the configuration will be used on.
       nixpkgs.hostPlatform = "aarch64-darwin";
 
+      nixpkgs.config.allowUnfree = true;
+
+      security.pam.services.sudo_local = {
+        touchIdAuth = true;
+        reattach = true; # Required for tmux and screen support
+      };
+
       fonts.packages = [
         pkgs.nerd-fonts.monaspace
         pkgs.inter
