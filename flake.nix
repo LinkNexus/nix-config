@@ -48,9 +48,13 @@
         pkgs.eza
         pkgs.tree-sitter
         pkgs.dotnet-sdk_10
+
+        pkgs.rustc
         pkgs.cargo
+
         pkgs.uv
-        pkgs.python315
+        pkgs.python314
+
         pkgs.lazygit
         pkgs.ripgrep
 
@@ -63,7 +67,11 @@
         pkgs.bear
         pkgs.simavr
 
+        pkgs.nodejs_25
         pkgs.bun
+
+        pkgs.opencode
+        pkgs.powershell
       ];
 
       # Necessary for using flakes on this system.
