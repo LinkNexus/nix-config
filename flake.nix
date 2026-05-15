@@ -108,12 +108,12 @@
       system.primaryUser = "levynkeneng";
 
       system.defaults = {
-        # NSGlobalDomain._HIHideMenuBar = true;
         dock.autohide = true;
         dock.persistent-apps = [
-          "${pkgs.ghostty-bin}/Applications/Ghostty.app"
+          "/Applications/Ghostty.app"
           "/Applications/Thunderbird.app"
           "/Applications/Zen.app"
+          "/Applications/Moonlight.app"
         ];
       };
     };
@@ -123,14 +123,6 @@
     darwinConfigurations."main" = nix-darwin.lib.darwinSystem {
       modules = [
         configuration
-        nix-homebrew.darwinModules.nix-homebrew
-        {
-          nix-homebrew = {
-            enable = true;
-            enableRosetta = true;
-            user = "levynkeneng";
-          };
-        }
       ];
     };
   };
