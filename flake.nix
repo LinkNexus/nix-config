@@ -100,6 +100,9 @@
       fonts.packages = [
         pkgs.nerd-fonts.monaspace
         pkgs.inter
+        pkgs.nerd-fonts.fira-code
+        pkgs.nerd-fonts.blex-mono
+        pkgs.nerd-fonts.caskaydia-cove
       ];
 
       homebrew = {
