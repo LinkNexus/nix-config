@@ -5,7 +5,6 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
-    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
 
     eza = {
       url = "github:eza-community/eza";
@@ -32,7 +31,6 @@
     self,
     nix-darwin,
     nixpkgs,
-    nix-homebrew,
     eza,
     rust-overlay,
     flake-utils,
@@ -43,14 +41,12 @@
       environment.systemPackages = [
         pkgs.neovim
         pkgs.tmux
-        pkgs.ghostty-bin
         pkgs.fzf
         pkgs.zoxide
         pkgs.starship
         pkgs.stow
         pkgs.eza
         pkgs.tree-sitter
-        pkgs.nodejs_25
         pkgs.dotnet-sdk_10
         pkgs.cargo
         pkgs.uv
