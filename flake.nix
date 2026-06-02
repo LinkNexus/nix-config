@@ -69,9 +69,17 @@
 
         pkgs.nodejs_25
         pkgs.bun
+        pkgs.tsx
 
         pkgs.opencode
         pkgs.powershell
+        pkgs.yazi
+        pkgs.sqlit-tui
+        pkgs.ascii-image-converter
+        pkgs.gh
+        pkgs.viu
+        pkgs.platformio
+        pkgs.mailpit
       ];
 
       # Necessary for using flakes on this system.
@@ -92,6 +100,14 @@
 
       nixpkgs.config.allowUnfree = true;
 
+      nix.gc = {
+        automatic = true;
+        dates = "weekly";
+        options = "--delete-older-than 7d";
+      };
+
+      nix.settings.auto-optimise-store = true;
+
       security.pam.services.sudo_local = {
         touchIdAuth = true;
         reattach = true; # Required for tmux and screen support
@@ -101,8 +117,10 @@
         pkgs.nerd-fonts.monaspace
         pkgs.inter
         pkgs.nerd-fonts.fira-code
-        pkgs.nerd-fonts.blex-mono
+        pkgs.nerd-fonts.commit-mono
         pkgs.nerd-fonts.caskaydia-cove
+        pkgs.nerd-fonts.jetbrains-mono
+        pkgs.nerd-fonts._0xproto
       ];
 
       system.primaryUser = "levynkeneng";
@@ -110,7 +128,7 @@
       system.defaults = {
         dock.autohide = true;
         dock.persistent-apps = [
-          "/Applications/Ghostty.app"
+          "/Applications/kitty.app"
           "/Applications/Thunderbird.app"
           "/Applications/Zen.app"
           "/Applications/Moonlight.app"
