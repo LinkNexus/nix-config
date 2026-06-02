@@ -1,11 +1,9 @@
 {
   description = "LinkNexus nix-darwin system flake";
-
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
-
     eza = {
       url = "github:eza-community/eza";
       inputs = {
@@ -13,16 +11,12 @@
         rust-overlay.follows = "rust-overlay";
       };
     };
-
-    flake-utils = {
-      url = "github:numtide/flake-utils";
-    };
-
+    flake-utils.url = "github:numtide/flake-utils";
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs = {
         nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
+        # flake-utils.follows = "flake-utils";
       };
     };
   };
@@ -35,84 +29,68 @@
     rust-overlay,
     flake-utils,
   }: let
-    configuration = {pkgs, ...}: {
-      # List packages installed in system profile. To search by name, run:
-      # $ nix-env -qaP | grep wget
-      environment.systemPackages = [
-        pkgs.neovim
-        pkgs.tmux
-        pkgs.fzf
-        pkgs.zoxide
-        pkgs.starship
-        pkgs.stow
-        pkgs.eza
-        pkgs.tree-sitter
-        pkgs.dotnet-sdk_10
+    # Packages shared across both platforms
+    sharedPackages = pkgs: [
+      pkgs.neovim
+      pkgs.tmux
+      pkgs.fzf
+      pkgs.zoxide
+      pkgs.starship
+      pkgs.stow
+      pkgs.eza
+      pkgs.tree-sitter
+      pkgs.dotnet-sdk_10
+      pkgs.rustc
+      pkgs.cargo
+      pkgs.uv
+      pkgs.python314
+      pkgs.lazygit
+      pkgs.ripgrep
+      pkgs.avrdude
+      pkgs.pkgsCross.avr.buildPackages.gcc
+      pkgs.pkgsCross.avr.buildPackages.binutils
+      pkgs.pkgsCross.avr.avrlibc
+      pkgs.cmake
+      pkgs.gnumake
+      pkgs.bear
+      pkgs.simavr
+      pkgs.nodejs_25
+      pkgs.bun
+      pkgs.tsx
+      pkgs.opencode
+      pkgs.powershell
+      pkgs.yazi
+      pkgs.sqlit-tui
+      pkgs.ascii-image-converter
+      pkgs.gh
+      pkgs.viu
+      pkgs.platformio
+      pkgs.mailpit
+    ];
 
-        pkgs.rustc
-        pkgs.cargo
+    # Darwin-specific config
+    darwinConfiguration = {pkgs, ...}: {
+      environment.systemPackages = sharedPackages pkgs;
 
-        pkgs.uv
-        pkgs.python314
-
-        pkgs.lazygit
-        pkgs.ripgrep
-
-        pkgs.avrdude # flashing tool
-        pkgs.pkgsCross.avr.buildPackages.gcc # avr-gcc cross-compiler
-        pkgs.pkgsCross.avr.buildPackages.binutils # avr-objcopy, avr-size etc.
-        pkgs.pkgsCross.avr.avrlibc
-        pkgs.cmake
-        pkgs.gnumake
-        pkgs.bear
-        pkgs.simavr
-
-        pkgs.nodejs_25
-        pkgs.bun
-        pkgs.tsx
-
-        pkgs.opencode
-        pkgs.powershell
-        pkgs.yazi
-        pkgs.sqlit-tui
-        pkgs.ascii-image-converter
-        pkgs.gh
-        pkgs.viu
-        pkgs.platformio
-        pkgs.mailpit
-      ];
-
-      # Necessary for using flakes on this system.
       nix.settings.experimental-features = "nix-command flakes";
-
-      # Enable alternative shell support in nix-darwin.
-      # programs.fish.enable = true;
-
-      # Set Git commit hash for darwin-version.
       system.configurationRevision = self.rev or self.dirtyRev or null;
-
-      # Used for backwards compatibility, please read the changelog before changing.
-      # $ darwin-rebuild changelog
       system.stateVersion = 6;
-
-      # The platform the configuration will be used on.
       nixpkgs.hostPlatform = "aarch64-darwin";
-
       nixpkgs.config.allowUnfree = true;
-
       nix.gc = {
         automatic = true;
-        dates = "weekly";
+        interval = {
+          Weekday = 0;
+          Hour = 0;
+          Minute = 0;
+        };
         options = "--delete-older-than 7d";
       };
-
       nix.settings.auto-optimise-store = true;
-
       security.pam.services.sudo_local = {
         touchIdAuth = true;
-        reattach = true; # Required for tmux and screen support
+        reattach = true;
       };
-
       fonts.packages = [
         pkgs.nerd-fonts.monaspace
         pkgs.inter
@@ -120,11 +98,8 @@
         pkgs.nerd-fonts.commit-mono
         pkgs.nerd-fonts.caskaydia-cove
         pkgs.nerd-fonts.jetbrains-mono
-        pkgs.nerd-fonts._0xproto
       ];
-
       system.primaryUser = "levynkeneng";
-
       system.defaults = {
         dock.autohide = true;
         dock.persistent-apps = [
@@ -135,13 +110,36 @@
         ];
       };
     };
-  in {
-    # Build darwin flake using:
-    # $ darwin-rebuild build --flake .#simple
-    darwinConfigurations."main" = nix-darwin.lib.darwinSystem {
-      modules = [
-        configuration
-      ];
+
+    # Linux config
+    linuxConfiguration = {pkgs, ...}: {
+      environment.systemPackages = sharedPackages pkgs;
+
+      nix.settings.experimental-features = "nix-command flakes";
+      nixpkgs.config.allowUnfree = true;
+      nix.gc = {
+        automatic = true;
+        dates = "weekly";
+        options = "--delete-older-than 7d";
+      };
+      nix.settings.auto-optimise-store = true;
     };
+  in {
+    darwinConfigurations."main" = nix-darwin.lib.darwinSystem {
+      modules = [darwinConfiguration];
+    };
+
+    # Apply on Fedora with:
+    # $ nix-env -iA nixpkgs.nix && nix profile install .#linuxPackages
+    packages.x86_64-linux.default = let
+      pkgs = import nixpkgs {
+        system = "x86_64-linux";
+        config.allowUnfree = true;
+      };
+    in
+      pkgs.buildEnv {
+        name = "linux-packages";
+        paths = sharedPackages pkgs;
+      };
   };
 }
