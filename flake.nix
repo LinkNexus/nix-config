@@ -54,7 +54,7 @@
       pkgs.gnumake
       pkgs.bear
       pkgs.simavr
-      pkgs.nodejs_25
+      pkgs.nodejs
       pkgs.bun
       pkgs.tsx
       pkgs.opencode
@@ -66,6 +66,8 @@
       pkgs.viu
       pkgs.platformio
       pkgs.mailpit
+      pkgs.codex
+      pkgs.claude-code
     ];
 
     # Darwin-specific config
@@ -98,6 +100,7 @@
         pkgs.nerd-fonts.commit-mono
         pkgs.nerd-fonts.caskaydia-cove
         pkgs.nerd-fonts.jetbrains-mono
+        pkgs.nerd-fonts.blex-mono
       ];
       system.primaryUser = "levynkeneng";
       system.defaults = {
