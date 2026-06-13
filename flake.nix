@@ -66,8 +66,8 @@
       pkgs.viu
       pkgs.platformio
       pkgs.mailpit
-      pkgs.codex
-      pkgs.claude-code
+      pkgs.ninja
+      pkgs.tree
     ];
 
     # Darwin-specific config
