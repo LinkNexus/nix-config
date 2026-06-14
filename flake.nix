@@ -68,6 +68,7 @@
       pkgs.mailpit
       pkgs.ninja
       pkgs.tree
+      pkgs.plantuml
     ];
 
     # Darwin-specific config
