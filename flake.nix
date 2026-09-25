@@ -16,7 +16,6 @@
       url = "github:oxalica/rust-overlay";
       inputs = {
         nixpkgs.follows = "nixpkgs";
-        # flake-utils.follows = "flake-utils";
       };
     };
   };
@@ -34,9 +33,10 @@
       pkgs.neovim
       pkgs.tmux
       pkgs.fzf
+      pkgs.bat
       pkgs.zoxide
       pkgs.starship
-      pkgs.stow
+      pkgs.zsh-autosuggestions
       pkgs.eza
       pkgs.tree-sitter
       pkgs.dotnet-sdk_10
@@ -46,34 +46,32 @@
       pkgs.python314
       pkgs.lazygit
       pkgs.ripgrep
-      pkgs.avrdude
-      pkgs.pkgsCross.avr.buildPackages.gcc
-      pkgs.pkgsCross.avr.buildPackages.binutils
-      pkgs.pkgsCross.avr.avrlibc
       pkgs.cmake
       pkgs.gnumake
       pkgs.bear
-      pkgs.simavr
       pkgs.nodejs
       pkgs.bun
       pkgs.tsx
-      pkgs.opencode
       pkgs.powershell
       pkgs.yazi
       pkgs.sqlit-tui
-      pkgs.ascii-image-converter
       pkgs.gh
-      pkgs.viu
-      pkgs.platformio
       pkgs.mailpit
       pkgs.ninja
-      pkgs.tree
-      pkgs.plantuml
+      pkgs.pkgsCross.mingwW64.buildPackages.gcc
+      pkgs.btop
+      pkgs.usbutils
+      pkgs.claude-code
+      pkgs.ffmpeg
     ];
 
     # Darwin-specific config
     darwinConfiguration = {pkgs, ...}: {
-      environment.systemPackages = sharedPackages pkgs;
+      environment.systemPackages =
+        sharedPackages pkgs
+        ++ [
+          pkgs.lua5_5
+        ];
 
       nix.settings.experimental-features = "nix-command flakes";
       system.configurationRevision = self.rev or self.dirtyRev or null;
@@ -101,7 +99,6 @@
         pkgs.nerd-fonts.commit-mono
         pkgs.nerd-fonts.caskaydia-cove
         pkgs.nerd-fonts.jetbrains-mono
-        pkgs.nerd-fonts.blex-mono
       ];
       system.primaryUser = "levynkeneng";
       system.defaults = {
