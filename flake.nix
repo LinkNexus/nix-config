@@ -40,72 +40,19 @@
       pkgs.zsh-autosuggestions
       pkgs.eza
       pkgs.tree-sitter
-      # NOTE: rustc and cargo were removed, not migrated to a project
-      # shell: there is no Rust here to migrate. No Cargo.toml anywhere
-      # under ~/Coding or ~/Uni, and ~/.cargo/bin is empty, so nothing was
-      # using them. A future Rust project should declare them in its own
-      # flake rather than bringing them back here.
-      # uv stays: nvim's dashboard shells out to `uv tool run img2art`
-      # (lua/plugins/snacks.lua), which runs on every startup in any
-      # directory -- including outside every project shell.
       pkgs.uv
       pkgs.python314
-      # git itself, not just the porcelain around it. Without this the
-      # only git on PATH is Apple's /usr/bin/git, which is a shim that
-      # delegates to xcrun -- and nixpkgs' darwin stdenv puts its own
-      # xcrun stub ahead of /usr/bin inside every nix devShell, so the
-      # shim fails there with "error: tool 'git' not found". That takes
-      # lazygit and gh down with it, since both shell out to git. Only
-      # noticeable once a project started auto-entering a devShell via
-      # direnv, but the dependency on an Xcode-provided git was always
-      # undeclared and fragile.
       pkgs.git
       pkgs.lazygit
       pkgs.ripgrep
       pkgs.gnumake
-      # Editor baseline, deliberately global rather than per-project.
-      # mason starts biome / tailwindcss-language-server (node), roslyn
-      # (dotnet) and basedpyright (python) when a file of that type is
-      # opened -- which may be a stray file with no project around it.
-      # Keeping these reachable is a choice that the editor should work
-      # on a one-off file; project shells shadow them where a specific
-      # version matters, since a devShell's PATH precedes this profile.
-      #
-      # Migrated OUT to project flakes, do not add back here:
-      #   bun, mailpit  -> blitz-task      tsx -> blitz-task, note-snap
-      #   bear          -> c_utils         mingwW64 gcc -> super_game
-      #   dotnet-sdk_10 -> blitz-task, Nightmare
-      #   cmake         -> super_game, c_utils, BallBalancer
-      #
-      # ninja is simply gone: nothing outside a project used it.
-      # BallBalancer's CMakeCache records "Unix Makefiles", super_game
-      # declares ninja in its own flake, and the only other mention
-      # anywhere was a readme inside catch2's vendored tree.
-      #
-      # gnumake stays despite being a build tool: lua/plugins/dev.lua
-      # gives telescope-fzf-native.nvim `build = "make"`, which lazy.nvim
-      # runs on plugin install/update outside any project shell. (An
-      # earlier note here claimed nvim-treesitter needed make too -- it
-      # does not: there is no compiler reference anywhere in its lua and
-      # the parsers arrive prebuilt.)
       pkgs.nodejs
       pkgs.powershell
       pkgs.yazi
       pkgs.sqlit-tui
       pkgs.gh
-      # NOTE: the MinGW-w64 cross compiler used to live here and was
-      # removed deliberately. nixpkgs' cross support is built around
-      # stdenv -- the compiler is a wrapper that takes its include and
-      # library paths from variables exported by stdenv's setup hook, so
-      # a bare copy on PATH cannot find mcfgthread (which
-      # --enable-threads=mcf makes it link implicitly) and dies in
-      # CMake's compiler check with "cannot find -lmcfgthread". It now
-      # lives in the one project that cross-compiles, as the `mingw`
-      # devShell in super_game's own flake, where the identical compiler
-      # works. Don't add it back here.
       pkgs.btop
       pkgs.usbutils
-      pkgs.claude-code
       pkgs.ffmpeg
     ];
 
@@ -117,49 +64,10 @@
           pkgs.lua5_5
         ];
 
-      # direnv + nix-direnv, so a project's toolchain can live in its own
-      # flake devShell and be entered automatically on `cd` rather than
-      # having to be installed globally. Without the automatic entering,
-      # per-project shells are friction nobody sustains -- which is why
-      # this lands before any devShell does.
-      #
-      # nix-direnv.enable and enableZshIntegration both default to true,
-      # hence the single line. The zsh hook deliberately does NOT live in
-      # zsh/rc.d/ with the rest of the shell config: /etc/zshrc is already
-      # nix-darwin-generated and is sourced before $ZDOTDIR/.zshrc, so the
-      # module's own integration is both earlier and declarative. Don't
-      # add a second `direnv hook zsh` in rc.d -- it would hook twice.
-      #
-      # NOTE: this is darwin-only. linuxConfiguration below is consumed as
-      # a plain buildEnv via `nix profile install`, where programs.* module
-      # options don't apply at all, so the Fedora path still has neither
-      # direnv nor a hook. Deliberately not plumbed until that path is
-      # actually used for development.
       programs.direnv.enable = true;
-
-      # Link the dotnet SDK's own tree into the system profile, so
-      # /run/current-system/sw/share/dotnet exists as a stable path.
-      #
-      # DOTNET_ROOT has to point at the SDK's share/dotnet directory, and
-      # zsh/rc.d/70-env.zsh used to derive it by resolving `which dotnet`
-      # all the way down to its /nix/store path. That is correct at the
-      # moment a shell starts and wrong from the next rebuild onwards:
-      # every already-open shell -- and everything launched from one,
-      # Neovim's dotnet plugins included -- keeps pointing at the previous
-      # dotnet-sdk generation. Because that store path is still present,
-      # dotnet silently pairs the new SDK with the old host and runtime
-      # ("the installed dotnet and the runtime have conflicting versions")
-      # rather than failing outright. Worse, nix.gc below runs weekly with
-      # --delete-older-than 7d, so eventually the stale path vanishes and
-      # those shells break hard instead.
-      #
-      # Going through /run/current-system fixes it for good: that symlink
-      # is repointed on every activation, so the same literal string
-      # resolves to whichever SDK the current generation ships, and a
-      # stale environment is no longer stale in any way that matters.
-      # nix-darwin's default pathsToLink is deliberately minimal (only
-      # /share/info, /share/man and friends), hence the explicit entry.
-      environment.pathsToLink = ["/share/dotnet"];
+      # Plain `use flake` leaks print-dev-env's nested TMPDIR into the shell;
+      # nvim's run dir then gets too long for a unix socket (fzf-lua breaks).
+      programs.direnv.nix-direnv.enable = true;
 
       nix.settings.experimental-features = "nix-command flakes";
       system.configurationRevision = self.rev or self.dirtyRev or null;
