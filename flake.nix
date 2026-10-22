@@ -40,7 +40,6 @@
       pkgs.zsh-autosuggestions
       pkgs.eza
       pkgs.tree-sitter
-      pkgs.dotnet-sdk_10
       # NOTE: rustc and cargo were removed, not migrated to a project
       # shell: there is no Rust here to migrate. No Cargo.toml anywhere
       # under ~/Coding or ~/Uni, and ~/.cargo/bin is empty, so nothing was
@@ -63,7 +62,6 @@
       pkgs.git
       pkgs.lazygit
       pkgs.ripgrep
-      pkgs.cmake
       pkgs.gnumake
       # Editor baseline, deliberately global rather than per-project.
       # mason starts biome / tailwindcss-language-server (node), roslyn
@@ -76,12 +74,25 @@
       # Migrated OUT to project flakes, do not add back here:
       #   bun, mailpit  -> blitz-task      tsx -> blitz-task, note-snap
       #   bear          -> c_utils         mingwW64 gcc -> super_game
+      #   dotnet-sdk_10 -> blitz-task, Nightmare
+      #   cmake         -> super_game, c_utils, BallBalancer
+      #
+      # ninja is simply gone: nothing outside a project used it.
+      # BallBalancer's CMakeCache records "Unix Makefiles", super_game
+      # declares ninja in its own flake, and the only other mention
+      # anywhere was a readme inside catch2's vendored tree.
+      #
+      # gnumake stays despite being a build tool: lua/plugins/dev.lua
+      # gives telescope-fzf-native.nvim `build = "make"`, which lazy.nvim
+      # runs on plugin install/update outside any project shell. (An
+      # earlier note here claimed nvim-treesitter needed make too -- it
+      # does not: there is no compiler reference anywhere in its lua and
+      # the parsers arrive prebuilt.)
       pkgs.nodejs
       pkgs.powershell
       pkgs.yazi
       pkgs.sqlit-tui
       pkgs.gh
-      pkgs.ninja
       # NOTE: the MinGW-w64 cross compiler used to live here and was
       # removed deliberately. nixpkgs' cross support is built around
       # stdenv -- the compiler is a wrapper that takes its include and
