@@ -41,25 +41,57 @@
       pkgs.eza
       pkgs.tree-sitter
       pkgs.dotnet-sdk_10
-      pkgs.rustc
-      pkgs.cargo
+      # NOTE: rustc and cargo were removed, not migrated to a project
+      # shell: there is no Rust here to migrate. No Cargo.toml anywhere
+      # under ~/Coding or ~/Uni, and ~/.cargo/bin is empty, so nothing was
+      # using them. A future Rust project should declare them in its own
+      # flake rather than bringing them back here.
+      # uv stays: nvim's dashboard shells out to `uv tool run img2art`
+      # (lua/plugins/snacks.lua), which runs on every startup in any
+      # directory -- including outside every project shell.
       pkgs.uv
       pkgs.python314
+      # git itself, not just the porcelain around it. Without this the
+      # only git on PATH is Apple's /usr/bin/git, which is a shim that
+      # delegates to xcrun -- and nixpkgs' darwin stdenv puts its own
+      # xcrun stub ahead of /usr/bin inside every nix devShell, so the
+      # shim fails there with "error: tool 'git' not found". That takes
+      # lazygit and gh down with it, since both shell out to git. Only
+      # noticeable once a project started auto-entering a devShell via
+      # direnv, but the dependency on an Xcode-provided git was always
+      # undeclared and fragile.
+      pkgs.git
       pkgs.lazygit
       pkgs.ripgrep
       pkgs.cmake
       pkgs.gnumake
-      pkgs.bear
+      # Editor baseline, deliberately global rather than per-project.
+      # mason starts biome / tailwindcss-language-server (node), roslyn
+      # (dotnet) and basedpyright (python) when a file of that type is
+      # opened -- which may be a stray file with no project around it.
+      # Keeping these reachable is a choice that the editor should work
+      # on a one-off file; project shells shadow them where a specific
+      # version matters, since a devShell's PATH precedes this profile.
+      #
+      # Migrated OUT to project flakes, do not add back here:
+      #   bun, mailpit  -> blitz-task      tsx -> blitz-task, note-snap
+      #   bear          -> c_utils         mingwW64 gcc -> super_game
       pkgs.nodejs
-      pkgs.bun
-      pkgs.tsx
       pkgs.powershell
       pkgs.yazi
       pkgs.sqlit-tui
       pkgs.gh
-      pkgs.mailpit
       pkgs.ninja
-      pkgs.pkgsCross.mingwW64.buildPackages.gcc
+      # NOTE: the MinGW-w64 cross compiler used to live here and was
+      # removed deliberately. nixpkgs' cross support is built around
+      # stdenv -- the compiler is a wrapper that takes its include and
+      # library paths from variables exported by stdenv's setup hook, so
+      # a bare copy on PATH cannot find mcfgthread (which
+      # --enable-threads=mcf makes it link implicitly) and dies in
+      # CMake's compiler check with "cannot find -lmcfgthread". It now
+      # lives in the one project that cross-compiles, as the `mingw`
+      # devShell in super_game's own flake, where the identical compiler
+      # works. Don't add it back here.
       pkgs.btop
       pkgs.usbutils
       pkgs.claude-code
