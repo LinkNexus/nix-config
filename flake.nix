@@ -68,6 +68,14 @@
       # Plain `use flake` leaks print-dev-env's nested TMPDIR into the shell;
       # nvim's run dir then gets too long for a unix socket (fzf-lua breaks).
       programs.direnv.nix-direnv.enable = true;
+      # Quiet dev-shell entry: no "loading"/"using flake"/nix-direnv chatter,
+      # no huge "export +AR +AS ..." diff. log_filter only lets matching
+      # *info* lines through and "^$" matches none; errors bypass it, so a
+      # blocked .envrc or a failing flake still says so.
+      programs.direnv.settings.global = {
+        hide_env_diff = true;
+        log_filter = "^$";
+      };
 
       nix.settings.experimental-features = "nix-command flakes";
       system.configurationRevision = self.rev or self.dirtyRev or null;
