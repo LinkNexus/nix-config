@@ -98,6 +98,7 @@
       };
       fonts.packages = [
         pkgs.nerd-fonts.monaspace
+        (import ./fonts/monaspice-rex.nix {inherit pkgs;})
         pkgs.inter
         pkgs.nerd-fonts.fira-code
         pkgs.nerd-fonts.commit-mono
